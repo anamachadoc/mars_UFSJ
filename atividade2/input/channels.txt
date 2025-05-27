@@ -1,1 +1,8 @@
 @CNNbrasil
+@BBCNewsBrasil
+@g1globo
+@estadao
+@folha
+@jornaloglobo
+MetrópolesTV
+@veja
