@@ -6,11 +6,11 @@ load_dotenv()
 
 kwargs = {
     'api_key': os.getenv('YOUTUBE_API_KEY'),
-    'videos_by_channel': 1000,
+    'videos_by_channel': 4000,
     'channel_path': 'input/channels.txt',
     'save_path': 'output/'
 }
-
+print(kwargs['api_key'])
 
 dataCollector = YoutubeDataCollector(**kwargs)
 
