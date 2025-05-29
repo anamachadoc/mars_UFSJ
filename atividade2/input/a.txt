@@ -1,7 +1,7 @@
-@CNNbrasil
+@CNNbrasil - ok
 @BBCNewsBrasil - ok
-@g1globo
-@estadao
+@g1globo - ok
+@estadao - ok
 @folha
 @jornaloglobo
 MetrópolesTV
