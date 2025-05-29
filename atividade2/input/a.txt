@@ -1,10 +1,10 @@
-@CNNbrasil - ok
-@BBCNewsBrasil - ok
-@g1globo - ok
-@estadao - ok
-@folha
-@jornaloglobo
-MetrópolesTV
+@CNNbrasil - ok anamachado
+@BBCNewsBrasil - ok ontem
+@g1globo - ok ontem
+@estadao - ok lucas
+@folha - ok greco
+@jornaloglobo - ok prenassi
+MetrópolesTV - ok 
 @veja
 @valoreconomico
 @Poder360
