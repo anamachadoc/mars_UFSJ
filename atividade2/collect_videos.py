@@ -15,11 +15,7 @@ class YoutubeDataCollector:
         self.handles = self._read_handles()
     
     def _read_handles(self):
-        try:
-            return [linha.strip() for linha in open(self.channel_path, 'r') if linha.strip()]
-        except Exception as e:
-            print(f"Erro ao ler o arquivo de canais: {e}")
-            return []
+        return [linha.strip() for linha in open(self.channel_path, 'r') if linha.strip()]
 
     def get_handles(self):
         return self.handles

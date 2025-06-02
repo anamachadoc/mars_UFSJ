@@ -5,11 +5,11 @@
 @folha - ok greco
 @jornaloglobo - ok prenassi
 MetrópolesTV - ok 
-@veja
-@valoreconomico
-@Poder360
-@exame
-@revistaISTOE
-@gzhdigital
-@gazetadopovo
-@@jovempannews
+@veja - ok andre
+@valoreconomico - ok prenassi
+@Poder360 - ok greco
+@exame - ok isabelle
+@revistaISTOE - ok lucas
+@gzhdigital - ok igor
+@gazetadopovo - ok
+@jovempannews
