@@ -1,0 +1,5 @@
+variable,max_value,min_value,mean_values,median_value,std_values
+views_video,10905002.0,0.0,34633.37,3142.0,171580.15
+likes_video,815175.0,0.0,1588.85,86.0,7858.34
+comentarios_video,39721.0,0.0,170.34,9.0,700.02
+duracao_segundos,42901.0,0.0,1118.89,195.0,2519.5

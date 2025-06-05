@@ -1,0 +1,16 @@
+titulo_canal,max_value,min_value,mean_values,median_value,std_values
+BBC News Brasil,23244,0,982.32,449.0,1597.69
+Gazeta do Povo,17249,0,447.48,122.0,946.53
+Jornal O Globo,39721,0,280.43,25.0,1152.43
+Metrópoles,26633,0,167.84,15.0,675.59
+g1,10208,0,94.9,12.0,367.8
+Folha de S.Paulo,10864,0,93.11,5.0,478.79
+Estadão,22884,0,89.66,7.0,604.06
+Poder360,4875,0,87.78,12.0,257.09
+CNN Brasil,7732,0,83.62,15.0,249.34
+VEJA+,9251,0,67.14,9.0,331.94
+IstoÉ Publicações,20869,0,49.4,0.0,425.0
+exame,5374,0,34.05,2.0,176.99
+Jovem Pan News,2675,0,30.26,5.0,105.75
+GZH,4027,0,28.74,3.0,146.36
+Valor Econômico,3660,0,18.22,0.0,134.43
