@@ -236,4 +236,5 @@ class DataAnalisys:
         fig.update_layout(
             template='simple_white'
         )
+        fig.write_image(f'{self.save_path}{variable}_distribution_frequency.png')
         fig.show()
