@@ -72,19 +72,17 @@ class TopicModeling:
 
         tqdm.pandas()
         self.videos_data['clean_desc'] = self.videos_data['descricao'].progress_apply(_preprocessing)
-
-        # Remove linhas com descrições vazias após pré-processamento
         self.videos_data = self.videos_data[self.videos_data['clean_desc'].str.strip() != '']
 
-    def gerar_embeddings_bertopic(self):
-        print('GERANDO EMBEDDINGS E REDUZINDO COM UMAP...')
+    def generate_embeddings(self):
+        print('GENERATE EMBEDDINGS...')
         model = SentenceTransformer('all-MiniLM-L6-v2')
         self.embeddings = model.encode(self.videos_data['clean_desc'].tolist(), show_progress_bar=True)
         umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0, metric='cosine', random_state=42)
         self.embeddings_reduced = umap_model.fit_transform(self.embeddings)
 
-    def encontrar_melhor_k(self, min_k=10, max_k=100, step=5):
-        print('ESCOLHENDO MELHOR K COM BETA-CV...')
+    def choose_best_k(self, min_k=10, max_k=100, step=5):
+        print('BEST K WITH BETA-CV...')
         k_values = list(range(min_k, max_k + 1, step))
         betacv_scores = []
 
@@ -93,13 +91,10 @@ class TopicModeling:
             labels = kmeans.fit_predict(self.embeddings_reduced)
             score = self.beta_cv(self.embeddings_reduced, labels)
             betacv_scores.append(score)
-
         first_derivative = np.gradient(betacv_scores)
         second_derivative = np.gradient(first_derivative)
         knee_index = np.argmin(second_derivative)
         self.best_k = k_values[knee_index]
-
-        # Plots
         plt.figure(figsize=(8, 5))
         plt.plot(k_values, betacv_scores, marker='o')
         plt.axvline(self.best_k, color='red', linestyle='--', label=f'Cotovelo em K={self.best_k}')
@@ -113,77 +108,55 @@ class TopicModeling:
     def beta_cv(self, X, labels):
         distances = pairwise_distances(X)
         n = len(labels)
-
         def intra_cluster_distance(dist_row, labels, idx):
             same_cluster = labels == labels[idx]
             same_cluster[idx] = False
             return np.sum(dist_row[same_cluster])
-
         def inter_cluster_distance(dist_row, labels, idx):
             other_cluster = labels != labels[idx]
             return np.sum(dist_row[other_cluster])
-
         A = np.array([intra_cluster_distance(distances[i], labels, i) for i in range(n)])
         B = np.array([inter_cluster_distance(distances[i], labels, i) for i in range(n)])
-
         a = np.sum(A)
         b = np.sum(B)
-
         labels_unq = np.unique(labels)
         members = np.array([(labels == lbl).sum() for lbl in labels_unq])
-
         N_in = np.array([m * (m - 1) for m in members])
         n_in = np.sum(N_in)
-
         N_out = np.array([m * (n - m) for m in members])
         n_out = np.sum(N_out)
-
         return (a / n_in) / (b / n_out)
 
-    def rodar_bertopic_com_kmeans(self):
-        print(f'RODANDO BERTopic com KMeans, K={self.best_k}...')
+    def bertopic_with_kmeans(self):
+        print(f'BERTopic with KMeans, K={self.best_k}...')
         kmeans = KMeans(n_clusters=self.best_k, random_state=42)
         cluster_labels = kmeans.fit_predict(self.embeddings_reduced)
-
         topic_model = BERTopic(
             calculate_probabilities=True,
             verbose=True
         )
-
         topics, _ = topic_model.fit_transform(self.videos_data['clean_desc'].tolist(), embeddings=self.embeddings, y=cluster_labels)
         self.videos_data['cluster'] = topics
         self.topic_model = topic_model
+        self._plot_bertopic()
 
-        self._plotar_topicos_bertopic()
-
-    def _plotar_topicos_bertopic(self):
+    def _plot_bertopic(self):
         fig_topics = self.topic_model.visualize_barchart(top_n_topics=self.best_k, n_words=10)
         fig_topics.write_html(f"{self.save_path}bertopic_barchart.html")
-
         fig_hierarchy = self.topic_model.visualize_hierarchy()
         fig_hierarchy.write_html(f"{self.save_path}bertopic_hierarchy.html")
-
         fig_heatmap = self.topic_model.visualize_heatmap()
         fig_heatmap.write_html(f"{self.save_path}bertopic_heatmap.html")
-
         fig_topics_over_time = self.topic_model.visualize_topics()
         fig_topics_over_time.write_html(f"{self.save_path}bertopic_topics.html")
 
-    def analisar_distribuicao_canais_por_topico(self):
-        print("ANALISANDO DISTRIBUICAO DOS CANAIS POR TOPICO...")
-
-        if 'cluster' not in self.videos_data.columns or 'titulo_canal' not in self.videos_data.columns:
-            raise ValueError("A coluna 'cluster' ou 'titulo_canal' nao foi encontrada. Execute a modelagem antes.")
-
-        # ------------------------------
-        # Parte 1: Todos os clusters
-        # ------------------------------
+    def distribution_topic_channel(self):
+        print("DISTRIBUTION TOPIC AND CHANNEL...")
         crosstab_todos = pd.crosstab(
             self.videos_data['cluster'],
             self.videos_data['titulo_canal'],
             normalize='index'
         )
-
         plt.figure(figsize=(15, 10))
         sns.heatmap(crosstab_todos, cmap='viridis', annot=False)
         plt.title("Distribuicao Relativa dos Canais por Topico (Todos os Clusters)")
@@ -193,19 +166,13 @@ class TopicModeling:
         plt.tight_layout()
         plt.savefig(f"{self.save_path}distribuicao_todos_canais_topico.png")
         plt.close()
-
-        # ------------------------------
-        # Parte 2: Top 10 clusters
-        # ------------------------------
         top_clusters = self.videos_data['cluster'].value_counts().nlargest(10).index
         dados_filtrados = self.videos_data[self.videos_data['cluster'].isin(top_clusters)]
-
         crosstab_top10 = pd.crosstab(
             dados_filtrados['cluster'],
             dados_filtrados['titulo_canal'],
             normalize='index'
         )
-
         plt.figure(figsize=(15, 8))
         sns.heatmap(crosstab_top10, cmap='viridis', annot=False)
         plt.title("Distribuicao Relativa dos Canais por Topico (Top 10 Clusters)")

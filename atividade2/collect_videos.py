@@ -29,19 +29,15 @@ class YoutubeDataCollector:
                 type='channel',
                 maxResults=1
             ).execute()
-
             if not responses.get('items'):
                 print(f"Canal não encontrado para handle: {handle}")
                 return None
-
             canal = responses['items'][0]
             nome = canal['snippet']['title']
             channel_id = canal['snippet']['channelId']
-
             print(f"Canal: {nome}")
             print(f"Channel ID: {channel_id}")
             return channel_id
-
         except Exception as e:
             print(f"Erro ao buscar channel ID para {handle}: {e}")
             return None
@@ -53,14 +49,11 @@ class YoutubeDataCollector:
                 part='contentDetails',
                 id=channel_id
             ).execute()
-
             uploads_playlist_id = response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
-
             videos = []
             next_page_token = None
             total_videos_to_fetch = self.videos_by_channel  # limite desejado
             fetched_videos = 0
-
             with tqdm(total=total_videos_to_fetch) as pbar:
                 while True:
                     playlist_items = self.youtube.playlistItems().list(
@@ -69,7 +62,6 @@ class YoutubeDataCollector:
                         maxResults=50,  # máximo permitido por chamada
                         pageToken=next_page_token
                     ).execute()
-
                     items = playlist_items.get('items', [])
                     for item in items:
                         try:
@@ -84,16 +76,12 @@ class YoutubeDataCollector:
                                 break
                         except Exception as e:
                             print(f"Erro ao extrair dados de vídeo da playlist: {e}")
-
                     if fetched_videos >= total_videos_to_fetch:
                         break
-
                     next_page_token = playlist_items.get('nextPageToken')
                     if not next_page_token:
                         break
-
             return videos
-
         except Exception as e:
             print(f"Erro ao obter vídeos do canal {channel_id}: {e}")
             return []
@@ -103,11 +91,9 @@ class YoutubeDataCollector:
                     part='statistics,snippet',
                     id=channel_id
                 ).execute()
-
         canal_info = canal_response['items'][0]
         stats = canal_info.get('statistics', {})
         snippet = canal_info.get('snippet', {})
-
         return {
             'channel_id': channel_id,
             'titulo': snippet.get('title', ''),
@@ -126,7 +112,7 @@ class YoutubeDataCollector:
         except Exception as e:
             print(f"Erro ao converter duração: {e}")
             return 0
-
+        
     def extract_data_video(self, video_ids):
         data = []
         for id in tqdm(video_ids):
@@ -138,17 +124,13 @@ class YoutubeDataCollector:
                 if not responses.get('items'):
                     print(f"Vídeo não encontrado: {id}")
                     continue
-
                 item = responses['items'][0]
                 channel_id = item['snippet']['channelId']
-
                 canal_response = self.youtube.channels().list(
                     part='statistics',
                     id=channel_id
                 ).execute()
-
                 canal_stats = canal_response['items'][0]['statistics']
-
                 data.append({
                     'video_id': id,
                     'titulo': item['snippet'].get('title', ''),
@@ -166,7 +148,6 @@ class YoutubeDataCollector:
                     'visualizacoes_canal': int(canal_stats.get('viewCount', 0)),
                     'total_videos_canal': int(canal_stats.get('videoCount', 0)),
                 })
-
             except Exception as e:
                 print(f"Erro ao extrair dados do vídeo {id}: {e}")
         return pd.DataFrame(data)
@@ -175,7 +156,6 @@ class YoutubeDataCollector:
         df_canal = pd.DataFrame([canal_data])
         canal_csv_path = f"{self.save_path}channel_{canal_data['handle']}.csv"
         df_canal.to_csv(canal_csv_path, index=False)
-
         videos_csv_path = f"{self.save_path}videos_{canal_data['handle']}.csv"
         videos_data.to_csv(videos_csv_path, index=False)
 
@@ -186,16 +166,12 @@ class YoutubeDataCollector:
                 channel_id = self._get_channel_id(handle)
                 if not channel_id:
                     continue
-
                 canal_data = self.get_channel_data(channel_id)
                 canal_data['handle'] = handle
-
                 videos = self.get_videos(channel_id)
                 print(len(videos))
                 video_ids = [v['ID'] for v in videos]
                 videos_data = self.extract_data_video(video_ids)
-
                 self.save_data(canal_data, videos_data)
-
             except Exception as e:
                 print(f"Erro ao processar canal {handle}: {e}")

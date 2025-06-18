@@ -1,5 +1,0 @@
-pandas
-google-api-python-client
-isodate
-tqdm
-python-dotenv
